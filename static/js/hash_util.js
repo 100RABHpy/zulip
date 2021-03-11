@@ -23,8 +23,17 @@ export function get_hash_section(hash) {
 // Some browsers zealously URI-decode the contents of
 // window.location.hash.  So we hide our URI-encoding
 // by replacing % with . (like MediaWiki).
+// Also we encode parenthesis because they create issue when combined with markdown link format.
+// For Example:[test](https:\\testHost/test)/something),this link will break after "test".
 export function encodeHashComponent(str) {
-    return encodeURIComponent(str).replace(/\./g, "%2E").replace(/%/g, ".");
+    const characterToBeReplaced = {
+        "%": ".",
+        "(": ".28",
+        ")": ".29",
+    };
+    return encodeURIComponent(str)
+        .replace(/\./g, "%2E")
+        .replace(/[%()]/g, (matched) => characterToBeReplaced[matched]);
 }
 
 export function encode_operand(operator, operand) {
@@ -66,7 +75,13 @@ export function decodeHashComponent(str) {
         // fail independent of our fault, so just tell the user
         // that the URL is invalid.
         // TODO: Show possible valid URLs to the user.
-        return decodeURIComponent(str.replace(/\./g, "%"));
+        const characterToBeReplaced = {
+            ".28": "(",
+            ".29": ")",
+        };
+        return decodeURIComponent(
+            str.replace(/\./g, "%").replace(/[()]/g, (matched) => characterToBeReplaced[matched]),
+        );
     } catch {
         ui_report.error(i18n.t("Invalid URL"), undefined, $("#home-error"), 2000);
         return "";
