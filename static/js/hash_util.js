@@ -75,13 +75,7 @@ export function decodeHashComponent(str) {
         // fail independent of our fault, so just tell the user
         // that the URL is invalid.
         // TODO: Show possible valid URLs to the user.
-        const characterToBeReplaced = {
-            ".28": "(",
-            ".29": ")",
-        };
-        return decodeURIComponent(
-            str.replace(/\./g, "%").replace(/[()]/g, (matched) => characterToBeReplaced[matched]),
-        );
+        return decodeURIComponent(str.replace(/\./g, "%"));
     } catch {
         ui_report.error(i18n.t("Invalid URL"), undefined, $("#home-error"), 2000);
         return "";
